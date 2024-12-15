@@ -1,5 +1,7 @@
 # Advanced_C
-
+<details><summary>LESSON 1: COMPILER - MARCO</summary>
+    <p>
+        
 
 Visual Code (VS Code) gồm có 2 phần là Compiler (dùng để biên dịch chương trình) và Text Editor (dùng để soạn thảo code). Compiler của VS Code dựa trên gcc và g++. Sau đây ta sẽ tìm hiểu về Compiler.
 
