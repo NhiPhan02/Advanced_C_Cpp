@@ -171,19 +171,187 @@ int main(){
 
 ## Variadic macro
 
-Variadic macro là một loại macro có thể chấp nhận một số lượng tham số không xác định, cho phép truyền vào số lượng đối số bất kỳ. 
+Variadic macro thường sử dụng đối với hàm có tham số truyền vào không xác định, cho phép truyền vào số lượng đối số bất kỳ. 
   
 ```c
 #include <stdio.h>
+#define COUNT_ARGS(...) (sizeof((int[]){__VA_ARGS__})/sizeof(int))
+/*
+ * COUNT_ARGS(1, 2, 3)
+ * sizeof((int[]){1, 2, 3}) = 12 byte
+ * sizeof(int) = 4
+ * => n = 3 phần tử
+ */
 
-//define Variadic Macro
-#define PRINT(fmt, ...) printf(fmt, __VA_ARGS__)
+#define sum2(...)                   \
+int arr[] = {__VA_ARGS__};          \
+int tong = 0;                       \
+int n = COUNT_ARGS(__VA_ARGS__);    \
+int i = 0;                          \
+while (i != n){                     \
+    tong += arr[i];                 \
+    i++;                            \
+}                                   \
+printf("Tổng là: %d", tong);        
 
-int main() {
-    PRINT("Hello, %s!\n", "World");  // In ra: Hello, World!
+
+int main()
+{
+     int a, b, c;
+    sum2(1, 2, 1, 0, 8, 9, 6);
     return 0;
+
 }
 ```
 
 </p>
 </details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<details><summary>LESSON 2: STDARG-ASSERT</summary>
+<p>
+  
+## 1. Thư viện STDARG
+
+Thư viện stdarg là tương tự với macro variadic ở Bài 1, nhưng được viết thành 1 thư viện, cung cấp các biến và hàm. Mục đích hỗ trợ làm việc với các hàm có số lượng input parameter không xác định. 
+
+Một số hàm:
+
+-**va_list**: là một kiểu dữ liệu dành cho tập hợp các tham số không xác định. Bản chất của nó là con trỏ kiểu char được định nghĩa lại tên bằng typedef: 
+```bash
+typedef char* va_list
+```
+Thông thường ta sử dụng va_list để khai báo một biến chứa các tham số không xác định. Vd:
+```bash
+va_list args;
+```
+
+-**va_start(va, l)**: Dùng để bắt đầu truy xuất các tham số biến. 
+va_start nhận hai đối số: Biến đã khai báo bằng va_list; Tên biến của tham số cố định cuối cùng trong danh sách tham số truyền vào.
+Sau hàm này chuỗi truyền vào sẽ được tách ra gồm: Tên tham số cố định cuối được truyền vào; Danh sách tham số không xác định.
+```bash
+va_start(args, count);
+```
+
+-**va_arg(va, type)**: Lấy các đối số tiếp theo trong danh sách các đối số không xác định. Cast nó sang kiểu dữ liệu được chỉ định trong type. 
+```bash
+va_arg(args, int);
+```
+
+-**va_copy(va_list dest, va_list src)**: Copy danh sách của src gắn vào dest.
+```bash
+va_copy(check,args);
+```
+
+
+-**va_end(va)**: Sau khi hoàn tất việc truy cập các đối số, cần gọi va_end để giải phóng tài nguyên được sử dụng bởi va_list
+```bash
+va_end(args);
+```
+
+**Ví dụ 1: Xuất các số ra màn hình**
+Cách 1: Cách làm sau đây sử dụng biến count cho biết số lượng phần tử không xác định.
+Nhược điểm của cách làm này là phải biết số lượng count trước
+```c
+#include <stdio.h>
+#include <stdarg.h>
+
+void Output_Func(int count, ...){
+    va_list args;
+    /*
+     * typedef char* va_list
+     * args = "int count, 2, 5, 9, 10, 11"
+            0xa0 'i', 0xa1 'n', ... 0xaa '2', ... 0xbf '1'
+     */
+    
+    va_start(args, count); //"count"  "2, 5, 9, 10, 11"
+    
+    /*
+     * Hàm va_arg(args,int)
+     * args: 
+     */
+    for(int i=0; i<count; i++){
+        printf("Giá trị thứ %d là: %d\n", i, va_arg(args, int));
+    }
+
+    va_end(args); //
+}
+
+int main(){
+    Output_Func(5, 2, 5, 9, 10, 11);
+}
+
+```
+
+**Ví dụ 2: Tính tổng**
+Cách 1: Cách làm sau đây sử dụng biến count cho biết số lượng phần tử không xác định.
+Nhược điểm của cách làm này là phải biết số lượng count trước
+```c
+#include <stdio.h>
+#include <stdarg.h>
+
+//Cách 3: Cách sau đây không cần biết trước số lượng tham số không xác định truyền vào.
+//Nhược điểm là sẽ sai nếu chuỗi có số 10.
+//Do mã ASCII của '\n' = 10
+#define tong(...) sum(__VA_ARGS__, '\n')
+
+void sum(int count, ...){
+    va_list args;
+    va_list check;
+    va_start(args, count);
+    va_copy(check, args);
+    int result = count;
+    
+    while(va_arg(check, char*) != (char*)'\n'){
+        result += va_arg(args, int);
+    }
+    printf("Kết quả là: %d", result);
+
+    va_end(args);
+    va_end(check);
+}
+int main(){
+    tong(4, 8, 20, 0, 2, 3);
+}
+
+```
+## 2. Thư viện ASSERT
+
+Thư viện assert.h là thư viện để hỗ trợ debug chương trình.
+
+-**Hàm assert()**: Dùng để kiểm tra điều kiện. Nếu điều kiện đúng (true) thì chương trình tiếp tục. Nếu điều kiện sai (false) thì dừng và báo lỗi. 
+
+**Ví dụ báo lỗi chia cho 0:**
+
+```c
+#include <stdio.h>
+#include <assert.h>
+double divide (int a, int b){
+    assert(b != 0 && "b phải khác 0");
+    return (double)a/b;
+}
+
+int main(){
+    printf("a/b = %f", divide(6,0));
+    return 0;
+}
+```
+
+**Báo lỗi:**: Do truyền vào b = 0, không thoả điều kiện b != 0 => Báo lỗi assert "b phải khác 0".
+
+```bash
+Assertion failed: b != 0 && "b phải khác 0", file ASSERT_Ex0.c, line 4
+```
+
+
