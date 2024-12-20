@@ -239,23 +239,23 @@ va_list args;
 
 -**va_start(va, l)**: Dùng để bắt đầu truy xuất các tham số biến. 
 va_start nhận hai đối số: Biến đã khai báo bằng va_list; Tên biến của tham số cố định cuối cùng trong danh sách tham số truyền vào.
-Sau hàm này chuỗi truyền vào sẽ được tách ra gồm: Tên tham số cố định cuối được truyền vào; Danh sách tham số không xác định. Vd
+Sau hàm này chuỗi truyền vào sẽ được tách ra gồm: Tên tham số cố định cuối được truyền vào; Danh sách tham số không xác định. Vd:
 ```bash
 va_start(args, count);
 ```
 
--**va_arg(va, type)**: Lấy các đối số tiếp theo trong danh sách các đối số không xác định. Cast nó sang kiểu dữ liệu được chỉ định trong type. Vd
+-**va_arg(va, type)**: Lấy các đối số tiếp theo trong danh sách các đối số không xác định. Cast nó sang kiểu dữ liệu được chỉ định trong type. Vd:
 ```bash
 va_arg(args, int);
 ```
 
--**va_copy(va_list dest, va_list src)**: Copy danh sách của src gắn vào dest. Vd
+-**va_copy(va_list dest, va_list src)**: Copy danh sách của src gắn vào dest. Vd:
 ```bash
 va_copy(check,args);
 ```
 
 
--**va_end(va)**: Sau khi hoàn tất việc truy cập các đối số, cần gọi va_end để giải phóng tài nguyên được sử dụng bởi va_list. Vd
+-**va_end(va)**: Sau khi hoàn tất việc truy cập các đối số, cần gọi va_end để giải phóng tài nguyên được sử dụng bởi va_list. Vd:
 ```bash
 va_end(args);
 ```
