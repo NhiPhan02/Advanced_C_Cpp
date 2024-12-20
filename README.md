@@ -224,11 +224,11 @@ int main()
   
 ## 1. Thư viện STDARG
 
-Thư viện stdarg là tương tự với macro variadic ở Bài 1, nhưng được viết thành 1 thư viện, cung cấp các biến và hàm. Mục đích hỗ trợ làm việc với các hàm có số lượng input parameter không xác định. 
+Thư viện stdarg là tương tự với Macro Variadic ở Lesson 1, nhưng được viết thành 1 thư viện, cung cấp các biến và hàm. Mục đích hỗ trợ làm việc với các hàm có số lượng input parameter không xác định. 
 
 Một số hàm:
 
--**va_list**: là một kiểu dữ liệu dành cho tập hợp các tham số không xác định. Bản chất của nó là con trỏ kiểu char được định nghĩa lại tên bằng typedef: 
+-**va_list**: Là một kiểu dữ liệu dành cho tập hợp các tham số không xác định. Bản chất của nó là con trỏ kiểu char được định nghĩa lại tên bằng typedef: 
 ```bash
 typedef char* va_list
 ```
