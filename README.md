@@ -346,7 +346,7 @@ int main(){
 }
 ```
 
-**Báo lỗi:**: Do truyền vào b = 0, không thoả điều kiện b != 0 => Báo lỗi assert "b phải khác 0".
+**Báo lỗi:** Do truyền vào b = 0, không thoả điều kiện b != 0 => Báo lỗi assert "b phải khác 0".
 
 ```bash
 Assertion failed: b != 0 && "b phải khác 0", file ASSERT_Ex0.c, line 4
