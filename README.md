@@ -351,5 +351,227 @@ int main(){
 ```bash
 Assertion failed: b != 0 && "b phải khác 0", file ASSERT_Ex0.c, line 4
 ```
+</p>
+</details>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<details><summary>LESSON 6: BITMASK</summary>
+<p>
+
+## 1. Khái niệm
+Bitmask là một kỹ thuật sử dụng các bit để lưu trữ và thao tác với các cờ (flags) hoặc trạng thái. Có thể sử dụng bitmask để đặt, xóa và kiểm tra trạng thái của các bit cụ thể trong một từ (word).
+Bitmask thường được sử dụng để tối ưu hóa bộ nhớ, thực hiện các phép toán logic trên một cụm bit, và quản lý các trạng thái, quyền truy cập, hoặc các thuộc tính khác của một đối tượng.
+## 2. Ứng dụng bitmask 
+Người ta dựa vào thuộc tính của các cổng logic NOT, AND, OR, XOR để vận dụng vào bitmask. Ví dụ:
+ - Cổng NOT: ~a. Đảo bit
+<img src="https://github.com/user-attachments/assets/ca3e9c64-c46b-4e11-bb25-defbb3116081" alt="Compiler Macro" width="350">
+
+ - Cổng AND: a & b. Kết quả chỉ bằng 1 khi cả a và b cùng bằng 1.
+<img src="https://github.com/user-attachments/assets/31c49323-3d6e-425b-bf20-d16f46a3d289" alt="Compiler Macro" width="400">
+
+ - Cổng OR: a | b. Kết quả chỉ bằng 0 nếu a và b cùng bằng 0.
+<img src="https://github.com/user-attachments/assets/eda6f8a9-9e1c-4894-8b9a-b65171e9be51" alt="Compiler Macro" width="400">
+
+ - Cổng XOR: a ^ b. Có thể sử dụng để toggle bit, khi a XOR với 1 thì kết quả sẽ là ~a.
+<img src="https://github.com/user-attachments/assets/915745ac-45fa-462c-91ae-2a9eac9147b3" alt="Compiler Macro" width="400">
+
+ - Shift left bitwise: Dùng để dịch trái, và các bit ngoài cùng bên phải (sau khi dịch) sẽ được đặt giá trị 0.
+   Vd:
+```bash
+   0b10010111 << 3 = 0b10111000
+```
+ - Shift right bitwise: Dùng để dịch phải, và các bit ngoài cùng bên trái (sau khi dịch) sẽ là 0 hoặc 1 tuỳ theo bit dấu MSB.
+   Vd:
+```bash
+   0b10010111 >> 3 = 0b11110010
+```
+ - Ví dụ: 
+```c
+//Sử dụng shift left bitwise
+#include <stdio.h>
+#include <stdint.h>
+                       //                         0      1
+#define GENDER    1 << 0  //bit 0: giới tính     nữ     nam   0b0000 0001
+#define SHIRT     1 << 1  //bit 1: áo thun      không   có    0b0000 0010
+#define HAT       1 << 2  //bit 2: nón          không   có    0b0000 0100
+#define SHOES     1 << 3  //bit 3: giày         không   có    0b0000 1000
+#define FEATURE1  1 << 4  //bit 4: tính năng 1  không   có    0b0001 0000
+#define FEATURE2  1 << 5  //bit 5: tính năng 2  không   có    0b0010 0000
+#define FEATURE3  1 << 6  //bit 6: tính năng 3  không   có    0b0100 0000
+#define FEATURE4  1 << 7  //bit 7: tính năng 4  không   có    0b1000 0000
+```
+Dùng OR trong bitmask:
+```c
+void enableFeature(uint8_t *options, uint8_t feature){
+    *options |= feature;
+}
+// options   = 0bxxxx xxxx
+// feature   = 0b0000 0010
+// OR        = 0bxxxx xx1x
+// feature   = 0b0000 1000
+// OR        = 0bxxxx 1x1x
+```
+
+Dùng AND và NOT trong bitmask:
+```c
+void disableFeature(uint8_t *options, uint8_t feature){
+    *options &= ~feature;
+}
+// options   = 0bxxxx xxxx
+// ~ feature = 0b1111 1110
+// AND       = 0bxxxx xxx0
+// ~ feature = 0b1111 0111
+// AND       = 0bxxxx 0xx0
+```
+
+```c
+uint8_t isFeatureEnable(uint8_t options, uint8_t feature){
+    return((options & feature) != 0); 
+    //true:  feature ON
+    //false: feature OFF
+}
+
+void listSelectedFeatures(uint8_t options){
+    printf("Selected Features: \n");
+
+    const char *featuresName[] = {
+        "Gender",
+        "Shirt",
+        "Hat",
+        "Shoes",
+        "Feature 1",
+        "Feature 2",
+        "Feature 3",
+        "Feature 4"
+    };
+    
+    for (int i = 0; i < 8; i++){
+        if((options >> i) & 1){
+            printf("%s\n", featuresName[i]);
+        }
+    }
+}
+
+int main(){
+    uint8_t options = 0;
+    enableFeature(&options, GENDER | HAT | SHOES);
+    if(isFeatureEnable(options, GENDER)) 
+        printf("GENDER được chọn\n");
+    else
+        printf("GENDER không được chọn\n");
+
+    if(isFeatureEnable(options, HAT))  
+        printf("HAT được chọn\n");
+    else                            
+        printf("HAT không được chọn\n");
+    disableFeature(&options, HAT);
+    listSelectedFeatures(options);
+    return 0;
+}
+```
+
+ - Kết quả:
+```bash
+GENDER được chọn
+HAT được chọn
+Selected Features: 
+Gender
+Shoes
+```
+
+
+## 3. Bit field
+
+Bit fields là kỹ thuật chỉ có trong struct, chỉ định các thành viên trong struct chiếm số lượng bit cụ thể, qua đó biểu thị trạng thái cờ on/off (Thay vì sử dụng toàn bộ các bit trong kiểu dữ liệu được khai báo thì chỉ sử dụng một số bit nhất định). Nhờ vậy, bit fields có tác dụng tối ưu bộ nhớ.
+
+**Ví dụ**:
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+
+#define COLOR_RED 0
+#define COLOR_BLACK 1
+#define COLOR_WHITE 2
+#define COLOR_BLUE 3
+#define POWER_100HP 0
+#define POWER_150HP 1
+#define POWER_200HP 2
+#define ENGINE_1_5L 0
+#define ENGINE_2_0L 1
+#define SUN_ROOF_MASK 1 << 0
+#define PREMIUM_AUDIO_MASK 1 << 1
+#define SPORTS_PACKAGE_MASK 1 << 2
+
+typedef uint8_t CarColor;
+typedef uint8_t CarPower;
+typedef uint8_t CarEngine;
+
+//Các bit của additionalOptions sẽ nằm ở bit 210
+typedef struct{
+    uint8_t additionalOptions : 3;
+    CarColor color : 2;
+    CarPower power : 2;
+    CarEngine engine : 1;
+}CarOptions;
+
+void configureCar(CarOptions *car, CarColor color, CarEngine engine, CarPower power, uint8_t options){
+    car->color = color;
+    car->engine = engine;
+    car->power = power;
+    car->additionalOptions = options;
+} 
+
+void setOptions(CarOptions *car, uint8_t options){
+    car->additionalOptions |= options;
+}
+
+void unsetOptions(CarOptions *car, uint8_t options){
+    car->additionalOptions &= ~ options;
+}
+
+void displayCarOptions(CarOptions car){
+    const char *colors[] = {"Red", "Black", "White", "Blue"};
+    const char *powers[] = {"100Hp", "150Hp", "200Hp"};
+    const char *engines[] = {"1.5L", "2.0L"};
+
+    printf("\nCar Options:\n");
+    printf("Color: %s\n", colors[car.color]);
+    printf("Power: %s\n", powers[car.power]);
+    printf("Engine: %s\n", engines[car.engine]);
+    printf("Sunroof: %s\n", (car.additionalOptions & SUN_ROOF_MASK) ? "Yes" : "No");
+    printf("Premium Audio: %s\n", (car.additionalOptions & PREMIUM_AUDIO_MASK) ? "Yes" : "No");
+    printf("Sports Package: %s\n", (car.additionalOptions & SPORTS_PACKAGE_MASK) ? "Yes" : "No");
+}
+
+int main(){
+    CarOptions myCar;
+    configureCar(&myCar, COLOR_BLACK, ENGINE_1_5L, POWER_150HP, SUN_ROOF_MASK | PREMIUM_AUDIO_MASK);
+    displayCarOptions(myCar);
+
+    setOptions(&myCar, SPORTS_PACKAGE_MASK);
+    displayCarOptions(myCar);
+
+    unsetOptions(&myCar, SUN_ROOF_MASK);
+    displayCarOptions(myCar);
+}
+
+```
+</p>
+</details>
 
