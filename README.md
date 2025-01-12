@@ -370,6 +370,259 @@ Assertion failed: b != 0 && "b phải khác 0", file ASSERT_Ex0.c, line 4
 
 
 
+
+
+
+
+<details><summary>LESSON 3: POINTER</summary>
+<p>
+  
+## 1. Định nghĩa con trỏ (pointer)
+
+Con trỏ là một biến chứa địa chỉ của một đối tượng khác (đối tượng ở đây có thể là: biến, hàm, mảng, …).
+Đối với 1 biến, máy tính sẽ hiểu 2 nội dung: Địa chỉ của biến (nằm trong vùng RAM, cấp phát cho biến), giá trị của biến tại địa chỉ đã cấp phát.
+Đối với con trỏ, cũng có 2 nội dung: Địa chỉ của con trỏ (cũng nằm trong vùng RAM), giá trị của con trỏ (là địa chỉ của biến mà con trỏ đang trỏ đến)
+Vd:   
+<img src="https://github.com/user-attachments/assets/298b43a9-db68-45f8-a208-ecba2ec79c4b" alt="Compiler Macro" width="550">
+
+**Kích thước của con trỏ:** Kích thước con trỏ trong lập trình thường được hiểu là kích thước bộ nhớ mà con trỏ chiếm dụng để lưu trữ địa chỉ của một biến hoặc đối tượng trong bộ nhớ. Kích thước này phụ thuộc vào hệ điều hành và kiến trúc của máy tính, cụ thể là số bit của bộ vi xử lý.
+ 
+ - Ví dụ:
+ - Trên hệ thống 32-bit, kích thước của con trỏ thường là 4 byte (32 bit).
+ - Trên hệ thống 64-bit, kích thước của con trỏ thường là 8 byte (64 bit).
+ - Lý do con trỏ có kích thước như vậy là vì con trỏ chỉ chứa một địa chỉ bộ nhớ, và địa chỉ này phải có độ dài phù hợp để chỉ đến một ô nhớ trong bộ nhớ của máy tính.
+
+## 2. Các loại con trỏ
+**Void pointer:** Là con trỏ mà có thể trỏ đến bất kỳ địa chỉ nào, mà không cần biết kiểu dữ liệu của giá trị tại địa chỉ đó
+```bash
+void *ptr_void;
+```
+Khi in ra giá trị mà void pointer trỏ đến, ta phải ép kiểu con trỏ void pointer trùng với kiểu dữ liệu sẽ đọc 
+```bash
+*(int*)ptr
+```
+Ví dụ:
+```c
+#include <stdio.h>
+
+int main(){
+    void *ptr;
+    int a = 5;
+    ptr = &a;
+    printf("Địa chỉ = %p. Giá trị = %d\n", ptr, *(int*)ptr);
+    //Địa chỉ dùng %p để hiển thị
+    //(int*)ptr: ép kiểu cho con trỏ, để con trỏ biết nó đang trỏ đến số nguyên => sẽ đọc 4 byte giá trị
+    //*(int*)ptr: lấy 4 byte tại địa chỉ ptr đang trỏ đến
+
+    double b = 3.14;
+    ptr = &b;
+    printf("Địa chỉ = %p. Giá trị = %f\n", ptr, *(double*)ptr);
+    printf("Địa chỉ = %p. Giá trị = %0.2f\n", ptr, *(double*)ptr);
+
+    char c = 'c';
+    ptr = &c;
+    printf("Địa chỉ = %p. Giá trị = %c\n", ptr, *(char*)ptr);
+
+    char arr[] = "hello";
+    ptr = arr; //không cần & 
+    printf("Địa chỉ = %p. Giá trị = %c\n", ptr, *(char*)ptr);           //ký tự đầu của "hello"
+    printf("Địa chỉ = %p. Giá trị = %c\n", ptr, *(char*)(ptr + 1));     //ký tự thứ 2 của "hello" = e
+    printf("Địa chỉ = %p. Giá trị = %c\n", ptr, *(char*)(ptr + 1) + 1); //ký tự e + 1
+    for(int i = 0; i<5; i++){
+        printf("Địa chỉ = %p. Giá trị = %c\n", ptr, *(char*)(ptr + i));
+    }
+
+    //Mảng con trỏ void
+    printf("\nMảng con trỏ void:\n");
+    void *ptr1[] = {&a, &b, &c, arr};
+    printf("Giá trị ptr1[0] = %d\n", *(int*)ptr1[0]);
+    printf("Giá trị ptr1[1] = %f\n", *(double*)ptr1[1]);
+    printf("Giá trị ptr1[2] = %c\n", *(char*)ptr1[2]);
+    printf("Giá trị ptr1[3] = %c\n", *(char*)ptr1[3]);
+    printf("Giá trị ptr1[3] = %c\n", *(char*)(ptr1[3]+1));
+
+
+    printf("\nvoid pointer của của int\n");
+    int num[] = {322, 5, 9};   //322 = 0b0001 0100 0010
+    void *ptr2 = num;
+    // printf("Địa chỉ = %p. Giá trị = %d\n", ptr2, *(char*)ptr2); //sai kiểu dữ liệu của pointer. KQ =66
+    // printf("Địa chỉ = %p. Giá trị = %d\n", ptr2, *(char*)(ptr2 + 1)); //sai kiểu dữ liệu của pointer. KQ =1
+    printf("Địa chỉ = %p. Giá trị = %d\n", ptr2, *(int*)(ptr2 + 4)); //KQ = Giá trị num[1] = 5
+
+    return 0;
+}
+```
+**Function pointer (con trỏ hàm):** Là con trỏ trỏ đến địa chỉ của một hàm.
+Để khai báo con trỏ hàm cần xem xét 2 thứ:
+Kiểu trả về của hàm, tham số truyền vào có kiểu dữ liệu là gì. Để khi khai báo con trỏ hàm phải có cùng kiểu trả về, và các tham số của nó phải có cùng kiểu dữ liệu
+```bash
+void (*ptr)(int, double);  
+```
+- Con trỏ ptr này sẽ trỏ đến một hàm có kiểu trả về là void và hàm này nhận vào hai tham số với kiểu dữ liệu lần lượt là int và double.
+- Con trỏ này có thể trỏ tới bất kỳ hàm nào trong chương trình có cùng kiểu trả về và kiểu tham số tương ứng như đã định nghĩa.
+
+```c
+#include <stdio.h>
+
+void sum(int a, int b) {printf("%d + %d = %d\n", a, b, a+b);}
+void subtract(int a, int b) {printf("%d - %d = %d", a, b, a-b);}
+void calculate(void (*ptr)(int, int), int a, int b){
+    ptr(a, b);
+}
+int main(){
+    //Cách 1:
+    // void (*ptr)(int, int) = sum;
+    // ptr (2, 3);
+
+    // ptr = subtract;
+    // ptr (5, 20);
+
+    //Cách 2:
+    // void (*ptr[])(int, int) = {&sum, &subtract};
+    // ptr[0](2, 3);
+    // ptr[1](5, 20);
+
+    //Cách 3:
+    calculate(sum, 2, 3);
+    calculate(subtract, 5, 20);
+    return 0;
+
+}
+
+```
+**Pointer to constant (con trỏ hằng):** Là con trỏ mà một khi trỏ tới địa chỉ nào đó rồi thì nó sẽ không được phép thay đổi giá trị tại địa chỉ mà nó trỏ đến thông qua dereference (*ptr). Nhưng giá trị tại địa chỉ đó có thể thay đổi.
+- Ứng dụng: Đối tượng đang được trỏ đến không bị thay đổi trong suốt quá trình chạy
+```bash
+int const *ptr_const; 
+const int *ptr_const;
+```
+```c
+#include <stdio.h>
+int a = 5;
+int b = 20;
+const int *ptr = &a;
+int *const ptr1 = &b;
+
+void stringCompare(const char *str1, const char *str2){
+    int *ptr2 = NULL; //trỏ đến 0x00
+}
+int main(){
+    //pointer to constant
+    //*ptr = 10; error: assignment of read-only location '*ptr'
+    a = 10;
+    printf("Địa chỉ = %p. Giá trị của a = %d\n", ptr, *ptr);
+
+    ptr = &b;
+    printf("Địa chỉ = %p. Giá trị của b = %d\n", ptr, *ptr);
+
+    //constant pointer
+    //ptr1 = &a; error: assignment of read-only variable 'ptr1'
+    return 0;
+}
+```
+**Constant pointer (hằng con trỏ):** Constant to pointer là một con trỏ mà trỏ đến 1 địa chỉ cố định. Sau khi con trỏ được khởi tạo, địa chỉ mà nó trỏ đến không thể thay đổi.
+```bash
+int *const const_ptr = &value;
+```
+```c
+#include <stdio.h>
+#include <stdlib.h>
+int main() {
+    int value = 5;
+    int test = 15;
+    int *const const_ptr = &value;
+    printf("value: %d\n", *const_ptr);  
+
+    *const_ptr = 7;
+    printf("value: %d\n", *const_ptr); 
+    //const_ptr = &test;  wrong
+    return 0;
+}
+```
+**Null pointer (con trỏ null):** Null Pointer là một con trỏ không trỏ đến bất kỳ đối tượng hoặc vùng nhớ cụ thể nào.
+- Khi khai báo 1 con trỏ mà chưa sử dụng ngay (chưa gán cho nó địa chỉ) thì phải mặc định cho nó là NULL, để nó không trỏ tới địa chỉ khác. Hoặc là sau khi sử dụng con trỏ xong, cũng phải trỏ nó đến NULL, để tránh nó trỏ đến các địa chỉ khác trong vùng RAM
+```bash
+int *ptr_null = NULL;
+```
+```c
+#include <stdio.h>
+
+int main(){
+    int *ptr = NULL;
+    if (ptr == NULL)
+        printf("ptr = NULL\n");
+    else    
+        printf("ptr khác NULL\n");
+    
+    int a = 5;
+    ptr = &a;
+    *ptr = 30;
+    ptr = NULL;
+    printf("a ban đầu = 5. Hiện tại a = %d\n", a);
+}
+```
+**Pointer to pointer (con trỏ cấp 2, cấp 3):** Là một kiểu dữ liệu trong ngôn ngữ lập trình cho phép lưu trữ địa chỉ của một con trỏ. Con trỏ đến con trỏ cung cấp một cấp bậc trỏ mới, cho phép thay đổi giá trị của con trỏ gốc. Cấp bậc này có thể hữu ích trong nhiều tình huống, đặc biệt là khi làm việc với các hàm cần thay đổi giá trị của con trỏ.
+- Con trỏ đến con trỏ là một kiểu dữ liệu cho phép lưu trữ địa chỉ của một con trỏ.
+- Nó cung cấp một cấp bậc trỏ mới, cho phép thay đổi giá trị của con trỏ gốc.
+- Cấp bậc này có thể hữu ích trong nhiều tình huống, đặc biệt là khi làm việc với các hàm cần thay đổi giá trị của con trỏ.
+```bash
+int **ptr;
+```
+```c
+#include <stdio.h> 
+int main() { 
+int a = 10; 
+int *ptr1 = &a; // Con trỏ ptr1 trỏ đến biến a 
+int **ptr2 = &ptr1; // Con trỏ ptr2 trỏ đến con trỏ ptr1 
+printf("Địa chỉ của a = %p. Giá trị của a = %d\n", &a, a); // In ra giá trị của a 
+printf("Địa chỉ của ptr1 = %p. Giá trị của ptr1 = %d\n", &ptr1, *ptr1); // In ra giá trị ptr1 trỏ tới (giá trị của a) 
+printf("Địa chỉ của ptr2 = %p. Giá trị của ptr2 = %d\n", &ptr2, **ptr2); // In ra giá trị ptr2 trỏ tới (giá trị của a qua ptr1) 
+return 0; 
+}
+```
+
+</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <details><summary>LESSON 6: BITMASK</summary>
 <p>
 
@@ -574,4 +827,24 @@ int main(){
 ```
 </p>
 </details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
