@@ -1,0 +1,87 @@
+/*#include <stdio.h>
+
+typedef struct {
+   void (*start)(int gpio);
+   void (*stop)(int gpio);
+   void (*changeSpeed)(int gpio, int speed);
+} MotorController;
+
+typedef int PIN;
+
+// Các hàm chung
+void startMotor(PIN pin) {
+   printf("Start motor at PIN %d\n", pin);
+}
+
+void stopMotor(PIN pin) {
+   printf("Stop motor at PIN %d\n", pin);
+}
+
+void changeSpeedMotor(PIN pin, int speed) {
+   printf("Change speed at PIN %d: %d\n", pin, speed);
+}
+
+// Macro để khởi tạo GPIO và MotorController
+#define INIT_MOTOR(motorName, pinNumber) \
+   PIN PIN_##motorName = pinNumber; \
+   MotorController motorName = {startMotor, stopMotor, changeSpeedMotor};
+
+int main() {
+   // Sử dụng macro để khởi tạo
+   INIT_MOTOR(motorA, 1);
+   INIT_MOTOR(motorB, 2);
+
+   // Sử dụng motorA
+   motorA.start(PIN_motorA);
+   motorA.changeSpeed(PIN_motorA, 50);
+   motorA.stop(PIN_motorA);
+
+   // Sử dụng motorB
+   motorB.start(PIN_motorB);
+   motorB.changeSpeed(PIN_motorB, 75);
+   motorB.stop(PIN_motorB);
+
+   return 0;
+}*/
+
+
+
+
+#include <stdio.h>
+
+typedef int PIN;
+
+typedef struct {
+    void (*start)(int);
+    void (*stop)(int);
+    void (*speed)(int, int);
+}MicrocontrolMotor;
+
+void startMotor(PIN pin){
+    printf("Start motor pin: %d\n", pin);
+}
+void stopMotor(PIN pin){
+    printf("Stop motor pin: %d\n", pin);
+}
+void changeSpeedMotor(PIN pin, int speed){
+    printf("Change speed motor pin %d: %d\n", pin, speed);
+}
+
+#define INIT_MOTOR(motor_name, pinNumber)   \
+    PIN PIN_##motor_name = pinNumber;       \
+    MicrocontrolMotor motor_name = {startMotor, stopMotor, changeSpeedMotor};
+
+int main(){
+    INIT_MOTOR(motorA, 1);
+    INIT_MOTOR(motorB, 2);
+
+    motorA.start(PIN_motorA);
+    motorA.speed(PIN_motorA, 50);
+    motorA.stop(PIN_motorA);
+
+    motorB.start(PIN_motorB);
+    motorB.speed(PIN_motorB, 100);
+    motorB.stop(PIN_motorB);
+}
+
+
