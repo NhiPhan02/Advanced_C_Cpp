@@ -619,6 +619,172 @@ return 0;
 
 
 
+<details><summary>LESSON 4: GOTO - SETJMP</summary>
+<p>
+  
+## 1. Goto
+	
+Goto được gọi là một từ khoá trong ngôn ngữ lập trình C/C++, cho phép chương trình nhảy từ vị trí này đến vị trí bất kì **trong cùng một hàm**. Từ khóa goto chỉ có thể nhảy cục bộ trong hàm, ví dụ hàm main. Thực chất có các cách khác để nhảy, ví dụ như tạo ra một biến để quản lý trạng thái, nhưng khai báo biến sẽ gây tốn vùng nhớ trên RAM để cấp phát, vì vậy dùng goto là cách tối ưu hơn vì không tốn vùng nhớ.
+Goto giúp việc kiểm soát luồng chạy (flow) của chương trình tốt hơn.
+
+**Ví dụ: In từ 0 đến 4**
+
+```c
+#include <stdio.h>
+
+int main(){
+    int i = 0;
+    start:
+    if(i >= 5)
+        goto end;
+    printf("i = %d\n",i);
+    i++;
+    goto start;
+    end:
+    return 0;
+}
+```
+**Kết quả:**
+
+```bash
+i = 0
+i = 1
+i = 2
+i = 3
+i = 4
+```
+
+
+Từ khóa `goto` có thể thay thế `break` hoặc các phương pháp khác khi cần thoát ra khỏi nhiều vòng lặp lồng nhau, giúp làm mã nguồn trở nên đơn giản và dễ quản lý hơn.
+
+```c
+#include <stdio.h>
+
+int main(){
+    int key = 0;
+    main_menu:
+    
+    do{
+        printf("1. Menu chinh\n");
+        printf("2. ...\n");
+        printf("3. ...\n");
+        printf("Nhap cac tuy chon: \n");  
+        scanf("%d", &key);
+    }while(key != 1);
+
+    switch(key){
+        case 1:
+            printf("4. ...\n");
+            printf("5. Ket thucc\n");
+            printf("6. Quay lai main menu\n");
+            printf("Nhap cac tuy chon: ");  scanf("%d", &key);
+            switch(key){
+                case 4:
+                case 5: goto exit_prog;
+                case 6: goto main_menu;   
+            }
+        case 2:
+        case 3:
+        break;
+    }
+    exit_prog:
+    return 0;
+}
+```
+
+## 2. Setjmp.h
+
+ - Goto chỉ có thể nhảy trong cùng 1 hàm, vậy muốn nhảy từ hàm này sang hàm khác thì ta sử dụng setjmp.h. Thư viện setjmp.h cung cấp các hàm như setjmp hoặc longjmp để nhảy từ vị trí ở hàm này sang vị trí ở hàm khác.
+ -  Ứng dụng của setjmp longjmp là dùng để debug chương trình, dùng để tạo ra xử lý lỗi ngoại lệ
+ -  Khác biệt so với Assert: khi dùng assert, nếu có lỗi sẽ dừng ngay lập tức ở assert. Còn setjmp sẽ hiển thị lỗi và chương trình vẫn tiếp tục thực thi
+ -  Setjmp sẽ thực hiện 2 chức năng: lưu lại trạng thái hiện tại (địa chỉ của dòng đó) và trả về 1 giá trị, và lần đầu tiên gọi thì sẽ trả lại giá trị 0, từ lần thứ 2 trở đi giá trị sẽ phụ thuộc vào hàm longjmp.
+ -  Chức năng của longjmp là khi gọi longjmp ra nó sẽ mặc định nhảy về vị trí của setjmp và gán con số cho hàm setjmp.
+ -  Cách sử dụng:
+ -  Đầu tiên, cần khai báo một biến buf, biến này có kiểu dữ liệu jmp_buf được định nghĩa trong thư viện setjmp.h
+```bash
+    jmp_buf buf;
+```
+
+ -  Tiếp theo, sử dụng hàm `setjmp` của thư viện `setjmp.h` để lưu trạng thái hiện tại của buf. Lần đầu tiên được gọi, setjmp sẽ trả về giá trị 0, từ lần thứ 2 trở đi giá trị sẽ phụ thuộc vào hàm longjmp.
+```bash
+exception = setjmp(buf);
+```
+ -  Tiếp theo, sử dụng hàm `longjmp` của thư viện `setjmp.h` nó sẽ mặc định nhảy về vị trí của setjmp và gán con số cho hàm setjmp.
+```bash
+longjmp(buf, x);
+```  
+
+**Ví dụ:**
+```c
+#include <stdio.h>
+#include <setjmp.h>
+
+jmp_buf buf;
+int exception;
+
+#define TRY if((exception = setjmp(buf)) == 0)
+#define CATCH(x) else if(exception == x)
+#define THROW(x) longjmp(buf, x)
+
+double divide (int a, int b){
+    if(a == 0 && b == 0)
+        THROW(1);
+    else if (b == 0)
+        THROW(2);
+    return (double)a/b;
+}
+int main(){
+    TRY    
+        printf("Ket qua la : %f\n", divide (3,0));
+    CATCH(1)
+        printf("a va b = 0\n");
+    CATCH(2)
+        printf("b = 0\n");
+}
+```
+
+**Kết quả:**
+
+```bash
+b = 0
+```
+
+</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
