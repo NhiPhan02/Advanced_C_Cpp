@@ -1,4 +1,4 @@
-# Advanced_C
+# Advanced C/C++
 <details><summary>LESSON 1: COMPILER - MARCO</summary>
     <p>
         
@@ -752,6 +752,185 @@ b = 0
 </p>
 </details>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<details><summary>LESSON 5: EXTERN-STATIC-VOLATILE-REGISTER</summary>
+<p>
+
+Một số từ khoá thường đi với khai báo biến hoặc khai báo hàm gồm: extern, static, volatile, register.
+## 1. Extern
+
+Mục đích của extern là 
+ - Dùng để chia sẻ tài nguyên (biến, mảng, hàm) giữa các file trong cùng một thư mục
+ - Khi dùng extern chỉ được phép khai báo, không được định nghĩa nội dung cho nó. Ví dụ: `extern int a;`
+ - Khi dùng extern thì phải liên kết file. Ví dụ: `gcc File1.c File2.c main.c -o main`
+
+Khi trình biên dịch gặp biến có từ khoá extern thì nó sẽ hiểu biến hoặc hàm đó đã được định nghĩa ở một nơi khác (file khác) và có thể được sử dụng ở file hiện tại.
+**Extern** thường ứng dụng trong thiết kế thư viện.
+**Lưu ý:** Trong C/C++, đối với hàm void, dù không sử dụng từ khoá extern vẫn có thể gọi lại trong các file khác.
+
+**Ví dụ:**
+File1.c  
+```c
+#include <stdio.h>
+#include "File1.h"
+
+int a = 10;
+
+void display1(){
+    printf("This is File1.c\n");
+}
+```
+File2.c
+```c
+#include <stdio.h>
+#include "File2.h"
+
+int b = 20;
+
+void display2(){
+    printf("This is File2.c\n");
+}
+```
+main.c
+```c
+#include <stdio.h>
+#include "File1.h"
+#include "File2.h"
+
+int main(){
+    a = 1;
+    printf("a = %d\n", a);
+
+    b = 2;
+    printf("b = %d\n", b);
+
+    display1();
+    display2();
+
+    return 0;
+}
+```
+Kết quả:
+```bash
+a = 1
+b = 2
+This is File1.c
+This is File2.c
+```
+## 2. Static
+Static gồm: static global và static local
+### Static local variables
+Static đi chung với biến cục bộ thì gọi là static cục bộ.  
+Thay vì địa chỉ của biến bình thường nằm trong phân vùng stack, địa chỉ của biến static cục bộ sẽ nằm ở phân vùng BSS (nếu giá trị khác 0), còn nếu giá trị bằng 0 thì nằm ở phân vùng Data. Địa chỉ của biến static cục bộ sẽ tồn tại xuyên suốt chương trình.
+**Ví dụ:**
+```c
+#include <stdio.h>
+
+void count(){
+    static int a = 5;
+    printf("a = %d\n", a++); //0xa5: 5 - BSS
+}
+
+int main(){
+    count();    //a = 5 -> 0xa5: 6
+    count();    //a = 6 -> 0xa5: 7
+    count();    //a = 7 -> 0xa5: 8
+
+    return 0;
+}
+```
+Với chương trình này, sẽ có sự khác biệt nếu ta khai báo biến a là `int a = 5;` và `static int a = 5;`  
+1. Khi khai báo `int a = 5`: Lúc này, a là biến cục bộ của hàm `count`. Khi ta gọi hàm `count` 3 lần trong hàm `main`. Mỗi lần gọi thì biến a sẽ được khai báo lại, địa chỉ của mỗi lần khai báo có thể khác nhau. Kết quả lúc này là:
+```bash
+a = 5
+a = 5
+a = 5
+```
+2. Khi khi báo `static int a = 5`: a là biến cục bộ với từ khoá `static`. Lúc này, sau lần gọi đầu, biến a sẽ được cấp một địa chỉ và địa chỉ này không bị mất khi thoát khỏi hàm `count`. Kết quả lúc này sẽ là:
+```bash
+a = 5
+a = 6
+a = 7
+```   
+### Static global variables
+**Chức năng:** Giới hạn phạm vi hoạt động của biến chỉ trong nội bộ của File hiện tại, dù các file khác muốn sử dụng lại biến này, dùng từ khoá extern thì cũng không được sử dụng lại biến này.	
+**Ứng dụng:** Dùng để thiết kế các file thư viện, tránh việc sử dụng các hàm ở những file khác gây lỗi thư viện.
+**Ví dụ:**
+```c
+#include <stdio.h>
+
+static int a;
+static void display(){
+    printf("Static void\n");
+}
+
+int main(){
+
+    return 0;
+}
+```
+## 3. Volatile 
+
+Khi một biến được khai báo nhưng không thay đổi trong suốt quá trình chạy, và trường hợp này xảy ra nhiều lần nhiều lần. Khi đó compiler sẽ tự động xoá biến đó, địa chỉ của biến đó sẽ bị thu hồi, gọi là tối ưu hoá.  
+Ví dụ: Biến được khai báo dành cho nút nhấn, nếu nhiều lần biến không thay đổi thì nó sẽ bị tối ưu hoá, sau đó, mặc dù có nhấn nút thì nó cũng không cập nhật giá trị cho biến nút nhấn. Để khắc phục trường hợp bị tối ưu hoá, ta có thể khai báo biến đó là volatile.  
+Volatile báo hiệu cho trình biên dịch rằng biến có thể thay đổi ngẫu nhiên, ngoài sự kiểm soát của chương trình.  
+Ví dụ chương trình đọc một nút bấm, định nghĩa như sau:
+```c
+#include “stm32f4xx.h”
+uint8_t *addr = (uint8_t*)0x20000000;
+volatile uint8_t var = 0;
+int main() {
+while(1) {
+	var = *addr;
+	if (var != 0){
+		break;
+	}
+    }
+};
+```
+Ở đây nếu không có volatile, thì sau nhiều lần lặp, biến var sẽ bị tối ưu hoá, lúc này dù có thay đổi giá trị của biến var, giá trị biến var sẽ luôn bằng 0, lặp vô tận.
+## 4. Register
+Khi khai báo biến, biến sẽ được cấp phát địa chỉ nằm trong vùng RAM. Nếu ta thực hiện phép toán trên biến đó thì để trả về kết quả của phép tính sẽ phải qua một số quá trình.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5368d917-f23f-4c36-aef6-fd29215ae5e9" alt="LESSON 5" width="579">
+</p>
+
+ -  Từ vùng nhớ RAM sẽ đẩy vào Register để lưu trữ trong thanh ghi R1, R2, R3…
+ -  Từ Register sẽ được đẩy vào ALU để thực hiện phép toán số học
+ -  Sau khi tính toán xong, kết quả sẽ trả về lại Register rồi mới trả về lại RAM
+ Quá trình thực hiện một phép tính phải qua nhiều bước, để tối ưu hoá việc này thì C/C++ cung cấp từ khoá Register.  
+ Một biến được khai báo bằng từ khoá Register sẽ được lưu trữ trực tiếp trong thanh ghi. Nhưng biến này sẽ không có địa chỉ trong RAM.
+
+**Ứng dụng:** Khai báo cho các biến đặt nặng vấn đề tính toán số học.  
+**Lưu ý:** Từ khoá register chỉ được khai báo biến cục bộ, không được khai báo biến toàn cục.
+ - Một là do biến register không có địa chỉ, làm giảm tính linh hoạt của biến. Biến toàn cục sẽ sử dụng ở nhiều vị trí khác nhau, khai báo bằng register sẽ không có địa chỉ, như vậy sẽ không thể truy cập được tới nó.
+ - Hai là do số lượng hạn chế của thanh ghi, tuỳ loại máy tính và dòng vi điều khiển sẽ có số lượng thanh ghi khác nhau, ví dụ từ R0 đến R31. Khi khai báo register toàn cục, nó sẽ dành hẳn 1 thanh ghi cho register.
+ 
+Tuy nhiên, việc sử dụng register chỉ là một đề xuất cho trình biên dịch và không đảm bảo rằng biến sẽ được lưu trữ trong thanh ghi. Trong thực tế, trình biên dịch có thể quyết định không tuân thủ lời đề xuất này.
+
+</p>
+</details>
 
 
 
