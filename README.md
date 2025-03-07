@@ -927,7 +927,7 @@ Khi khai báo biến, biến sẽ được cấp phát địa chỉ nằm trong 
  - Một là do biến register không có địa chỉ, làm giảm tính linh hoạt của biến. Biến toàn cục sẽ sử dụng ở nhiều vị trí khác nhau, khai báo bằng register sẽ không có địa chỉ, như vậy sẽ không thể truy cập được tới nó.
  - Hai là do số lượng hạn chế của thanh ghi, tuỳ loại máy tính và dòng vi điều khiển sẽ có số lượng thanh ghi khác nhau, ví dụ từ R0 đến R31. Khi khai báo register toàn cục, nó sẽ dành hẳn 1 thanh ghi cho register.
  
-Tuy nhiên, việc sử dụng register chỉ là một đề xuất cho trình biên dịch và không đảm bảo rằng biến sẽ được lưu trữ trong thanh ghi. Trong thực tế, trình biên dịch có thể quyết định không tuân thủ lời đề xuất này.
+Tuy nhiên, việc sử dụng register chỉ là một đề xuất cho trình biên dịch và không đảm bảo rằng biến sẽ được lưu trữ trong thanh ghi. Trong thực tế, trình biên dịch có thể quyết định không tuân thủ lời đề xuất này
 
 </p>
 </details>
