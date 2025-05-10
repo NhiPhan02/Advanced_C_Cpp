@@ -448,7 +448,7 @@ int main(){
     // printf("Địa chỉ = %p. Giá trị = %d\n", ptr2, *(char*)ptr2); //sai kiểu dữ liệu của pointer. KQ =66
     // printf("Địa chỉ = %p. Giá trị = %d\n", ptr2, *(char*)(ptr2 + 1)); //sai kiểu dữ liệu của pointer. KQ =1
     printf("Địa chỉ = %p. Giá trị = %d\n", ptr2, *(int*)(ptr2 + 4)); //KQ = Giá trị num[1] = 5
-    //Đối với con trỏ kiểu void, khi ta muốn in ra num[1] thì không thể dùng kiểu: *(int*)(ptr2 + 1). Do nó là
+    //Đối với con trỏ kiểu void, khi ta muốn in ra num[1] thì không thể dùng kiểu:   *(int*)(ptr2 + 1). Do nó là
     //con trỏ kiểu void, phải trải qua bước ép kiểu. Do đó, muốn in num[1] thì phải: *(int*)(ptr2 + 4)
 
     return 0;
